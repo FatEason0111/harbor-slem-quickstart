@@ -75,6 +75,30 @@ You also need:
 - a hostname and IP for Harbor
 - basic shell tools available on the target host
 
+## Name Resolution / 域名解析要求
+
+在浏览器、本地终端或者其他客户端访问 Harbor 之前，必须先保证：
+
+- `HARBOR_HOSTNAME` can be resolved to `HARBOR_IP`
+- the machine accessing Harbor knows how to reach that hostname
+
+推荐方式：
+
+- 如果你的环境里有 DNS 服务器，直接为 Harbor 配置一条 DNS 解析记录
+- 如果没有 DNS，也可以在访问端机器上配置静态 `hosts`
+
+Example / 示例:
+
+```text
+192.168.202.140 harbortest.lab.local harbor
+```
+
+说明：
+
+- [`scripts/02-configure-host-and-certs.sh`](./scripts/02-configure-host-and-certs.sh) 会在 Harbor 服务器本机写入 `/etc/hosts`
+- 但如果你要从你自己的电脑、跳板机或其他 Linux client 访问 Harbor，这些客户端也需要能解析这个主机名
+- 如果客户端没有 DNS 解析能力，请手动在客户端的 `hosts` 文件里添加同样的映射
+
 ## Configuration / 配置说明
 
 First, edit:
@@ -111,6 +135,7 @@ vi scripts/00-vars.sh
 ```
 
 确认主机名、IP、密码和证书信息都符合你的环境。
+同时确认 `HARBOR_HOSTNAME` 在你的访问环境里可以解析到 `HARBOR_IP`。
 
 ### Step 1. Install prerequisites / 安装依赖
 
@@ -157,6 +182,10 @@ This step will:
 - generate server certificate and key for Harbor
 - copy the certs into Harbor data paths
 - trust the generated CA on the local host
+
+注意：
+这个步骤只保证 Harbor 服务器本机能解析该主机名。
+If you access Harbor from another machine, make sure DNS or static `hosts` is configured there as well.
 
 ### Step 4. Enable Podman socket / 启用 Podman socket
 
